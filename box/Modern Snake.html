@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Snake - Game Joy</title>
+    <meta name="description" content="Experience the classic Snake game with modern twists. Collect power-ups, avoid obstacles, and challenge your reflexes in this addictive arcade game.">
+    <meta name="keywords" content="modern snake, arcade game, retro game, browser game, casual game">
+    <link rel="canonical" href="https://yourgamejoy.com/box/Modern-Snake.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            primary: '#007AFF',
+                            secondary: '#5856D6',
+                            accent: '#FF2D55',
+                            success: '#34C759',
+                            warning: '#FF9500',
+                            danger: '#FF3B30',
+                            dark: '#1C1C1E',
+                            light: '#F2F2F7',
+                            muted: '#8E8E93',
+                            yellow: '#FFCC00'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        .game-container {
+            aspect-ratio: 16/9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .game-canvas {
+            background: #1C1C1E;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .breadcrumb-container {
+            background: #ffffff;
+            border: 1px solid rgba(0, 122, 255, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .breadcrumb {
+            font-weight: 500;
+        }
+        .breadcrumb-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .breadcrumb-item:not(:last-child)::after {
+            content: "›";
+            margin: 0 0.75rem;
+            color: #8E8E93;
+            font-size: 1.2em;
+            position: relative;
+            top: -1px;
+        }
+        .breadcrumb-item a {
+            position: relative;
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            color: #007AFF;
+            text-decoration: none;
+        }
+        .breadcrumb-item a:hover {
+            color: #AF52DE;
+        }
+        .breadcrumb-item a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to right, #007AFF, #AF52DE);
+            transition: width 0.2s ease;
+        }
+        .breadcrumb-item a:hover::after {
+            width: 100%;
+        }
+        .breadcrumb-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007AFF, #AF52DE);
+            color: white;
+            font-size: 10px;
+        }
+        .game-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .game-tag:hover {
+            transform: translateY(-1px);
+        }
+        .power-up {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-apple-light text-apple-dark min-h-screen">
+    <header class="bg-apple-primary text-white p-4 md:p-6 shadow-md">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                    <div class="flex items-center gap-4">
+                        <h1 class="text-3xl md:text-4xl font-bold">Modern Snake</h1>
+                        <span class="hidden md:inline-block px-3 py-1 bg-apple-accent rounded-full text-sm">Arcade</span>
+                        <span class="hidden md:inline-block px-3 py-1 bg-apple-secondary rounded-full text-sm">Casual</span>
+                        <span class="hidden md:inline-block px-3 py-1 bg-apple-warning rounded-full text-sm">Skill-based</span>
+                    </div>
+                    <p class="text-lg mt-2">Navigate through increasingly challenging levels, collect power-ups, and avoid obstacles!</p>
+                </div>
+                <nav>
+                    <ul class="flex space-x-4">
+                        <li><a href="../index.html" class="hover:text-apple-yellow transition-colors">Game Joy</a></li>
+                        <li><a href="#game" class="hover:text-apple-yellow transition-colors">Play Now</a></li>
+                        <li><a href="#about" class="hover:text-apple-yellow transition-colors">About</a></li>
+                        <li><a href="#features" class="hover:text-apple-yellow transition-colors">Features</a></li>
+                        <li><a href="#controls" class="hover:text-apple-yellow transition-colors">Controls</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6">
+        <nav class="text-sm mb-6 breadcrumb-container p-3 rounded-lg">
+            <ol class="flex items-center space-x-2 breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="../index.html" class="flex items-center">
+                        <span class="breadcrumb-icon">🏠</span>
+                        <span>Game Joy</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item text-apple-dark font-medium">
+                    <span class="breadcrumb-icon">🐍</span>
+                    <span>Modern Snake</span>
+                </li>
+            </ol>
+        </nav>
+
+        <section id="game" class="mb-12">
+            <div class="game-container">
+                <canvas id="gameCanvas" class="game-canvas w-full h-full"></canvas>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <span class="text-lg font-semibold">Score: <span id="score">0</span></span>
+                    <span class="text-lg font-semibold">High Score: <span id="highScore">0</span></span>
+                </div>
+                <button id="startButton" class="px-6 py-2 bg-apple-success text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                    Start Game
+                </button>
+            </div>
+        </section>
+
+        <section id="about" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">About Modern Snake</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <p class="text-lg mb-4">
+                        Modern Snake is a fresh take on the classic arcade game. Navigate through increasingly challenging levels, collect power-ups, and avoid obstacles in this addictive reimagining of the beloved snake game.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="game-tag bg-apple-primary text-white">Arcade</span>
+                        <span class="game-tag bg-apple-secondary text-white">Casual</span>
+                        <span class="game-tag bg-apple-warning text-white">Skill-based</span>
+                        <span class="game-tag bg-apple-success text-white">Family-friendly</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">Game Features</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Modern visual effects and animations
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Power-ups and special abilities
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Progressive difficulty levels
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Global leaderboard
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">Power-ups & Special Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-3xl mb-4">⚡</div>
+                    <h3 class="text-xl font-bold mb-2">Speed Boost</h3>
+                    <p class="text-apple-muted">Temporarily increase your snake's speed to collect more food</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-3xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-bold mb-2">Shield</h3>
+                    <p class="text-apple-muted">Protect yourself from obstacles for a limited time</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-3xl mb-4">✨</div>
+                    <h3 class="text-xl font-bold mb-2">Score Multiplier</h3>
+                    <p class="text-apple-muted">Double your points for a short period</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="controls" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">How to Play</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">Keyboard Controls</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">↑</span>
+                            Move Up
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">↓</span>
+                            Move Down
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">←</span>
+                            Move Left
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">→</span>
+                            Move Right
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">Space</span>
+                            Pause Game
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">Touch Controls</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Swipe to change direction
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Tap to pause
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Double tap for special moves
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-apple-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h5 class="text-xl font-bold mb-4">Game Joy</h5>
+                    <p class="text-apple-muted">Your premier destination for online gaming entertainment</p>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold mb-4">Quick Links</h5>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html" class="text-apple-muted hover:text-apple-accent">Home</a></li>
+                        <li><a href="#" class="text-apple-muted hover:text-apple-accent">About Us</a></li>
+                        <li><a href="#" class="text-apple-muted hover:text-apple-accent">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold mb-4">Connect With Us</h5>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-apple-muted hover:text-apple-accent">Twitter</a>
+                        <a href="#" class="text-apple-muted hover:text-apple-accent">Discord</a>
+                        <a href="#" class="text-apple-muted hover:text-apple-accent">Reddit</a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-apple-muted text-center">
+                <p class="text-apple-muted">&copy; 2024 Game Joy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Game variables
+        let snake = [];
+        let food = {};
+        let direction = 'right';
+        let gameLoop = null;
+        let score = 0;
+        let highScore = localStorage.getItem('snakeHighScore') || 0;
+        const gridSize = 20;
+        const gameSpeed = 100;
+
+        // Game initialization code
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+
+        // Set canvas size
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+
+        // Initialize game
+        function initGame() {
+            // Reset game state
+            snake = [
+                {x: 5, y: 5},
+                {x: 4, y: 5},
+                {x: 3, y: 5}
+            ];
+            direction = 'right';
+            score = 0;
+            scoreElement.textContent = score;
+            highScoreElement.textContent = highScore;
+            
+            // Generate first food
+            generateFood();
+            
+            // Start game loop
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(gameStep, gameSpeed);
+            
+            // Add keyboard controls
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // Generate food at random position
+        function generateFood() {
+            const maxX = Math.floor(canvas.width / gridSize);
+            const maxY = Math.floor(canvas.height / gridSize);
+            
+            do {
+                food = {
+                    x: Math.floor(Math.random() * maxX),
+                    y: Math.floor(Math.random() * maxY)
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+        }
+
+        // Handle keyboard input
+        function handleKeyPress(event) {
+            const key = event.key.toLowerCase();
+            
+            switch(key) {
+                case 'arrowup':
+                case 'w':
+                    if (direction !== 'down') direction = 'up';
+                    break;
+                case 'arrowdown':
+                case 's':
+                    if (direction !== 'up') direction = 'down';
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    if (direction !== 'right') direction = 'left';
+                    break;
+                case 'arrowright':
+                case 'd':
+                    if (direction !== 'left') direction = 'right';
+                    break;
+                case ' ':
+                    pauseGame();
+                    break;
+            }
+        }
+
+        // Game step function
+        function gameStep() {
+            // Move snake
+            const head = {...snake[0]};
+            
+            switch(direction) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+            
+            // Check collision with walls
+            if (head.x < 0 || head.x >= canvas.width / gridSize ||
+                head.y < 0 || head.y >= canvas.height / gridSize) {
+                gameOver();
+                return;
+            }
+            
+            // Check collision with self
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOver();
+                return;
+            }
+            
+            // Add new head
+            snake.unshift(head);
+            
+            // Check if food is eaten
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                scoreElement.textContent = score;
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('snakeHighScore', highScore);
+                }
+                generateFood();
+            } else {
+                snake.pop();
+            }
+            
+            // Draw game
+            draw();
+        }
+
+        // Draw game state
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#1C1C1E';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw snake
+            ctx.fillStyle = '#34C759';
+            snake.forEach((segment, index) => {
+                ctx.fillRect(
+                    segment.x * gridSize,
+                    segment.y * gridSize,
+                    gridSize - 1,
+                    gridSize - 1
+                );
+            });
+            
+            // Draw food
+            ctx.fillStyle = '#FF3B30';
+            ctx.fillRect(
+                food.x * gridSize,
+                food.y * gridSize,
+                gridSize - 1,
+                gridSize - 1
+            );
+        }
+
+        // Game over function
+        function gameOver() {
+            clearInterval(gameLoop);
+            gameLoop = null;
+            alert(`Game Over! Score: ${score}`);
+            startButton.disabled = false;
+        }
+
+        // Pause game
+        function pauseGame() {
+            if (gameLoop) {
+                clearInterval(gameLoop);
+                gameLoop = null;
+                startButton.disabled = false;
+            } else {
+                gameLoop = setInterval(gameStep, gameSpeed);
+                startButton.disabled = true;
+            }
+        }
+
+        // Event listeners
+        window.addEventListener('resize', resizeCanvas);
+        startButton.addEventListener('click', () => {
+            startButton.disabled = true;
+            initGame();
+        });
+
+        // Initial setup
+        resizeCanvas();
+    </script>
+</body>
+</html> 

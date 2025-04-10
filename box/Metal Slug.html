@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metal Slug - Game Joy</title>
+    <meta name="description" content="Experience the classic Metal Slug game with modern twists. Fight enemies, collect power-ups, and challenge your reflexes in this addictive arcade game.">
+    <meta name="keywords" content="metal slug, arcade game, retro game, browser game, action game">
+    <link rel="canonical" href="https://yourgamejoy.com/box/Metal-Slug.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        apple: {
+                            primary: '#007AFF',
+                            secondary: '#5856D6',
+                            accent: '#FF2D55',
+                            success: '#34C759',
+                            warning: '#FF9500',
+                            danger: '#FF3B30',
+                            dark: '#1C1C1E',
+                            light: '#F2F2F7',
+                            muted: '#8E8E93',
+                            yellow: '#FFCC00'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        .game-container {
+            aspect-ratio: 16/9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .game-canvas {
+            background: #1C1C1E;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .breadcrumb-container {
+            background: #ffffff;
+            border: 1px solid rgba(0, 122, 255, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .breadcrumb {
+            font-weight: 500;
+        }
+        .breadcrumb-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .breadcrumb-item:not(:last-child)::after {
+            content: "›";
+            margin: 0 0.75rem;
+            color: #8E8E93;
+            font-size: 1.2em;
+            position: relative;
+            top: -1px;
+        }
+        .breadcrumb-item a {
+            position: relative;
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            color: #007AFF;
+            text-decoration: none;
+        }
+        .breadcrumb-item a:hover {
+            color: #AF52DE;
+        }
+        .breadcrumb-item a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to right, #007AFF, #AF52DE);
+            transition: width 0.2s ease;
+        }
+        .breadcrumb-item a:hover::after {
+            width: 100%;
+        }
+        .breadcrumb-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007AFF, #AF52DE);
+            color: white;
+            font-size: 10px;
+        }
+        .game-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .game-tag:hover {
+            transform: translateY(-1px);
+        }
+        .power-up {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="bg-apple-light text-apple-dark min-h-screen">
+    <header class="bg-apple-primary text-white sticky top-0 z-50 shadow-lg">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex flex-wrap justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold tracking-tight">Metal Slug</h1>
+                    <span class="hidden md:inline-block px-3 py-1 bg-apple-accent rounded-full text-sm">Arcade</span>
+                </div>
+                <nav>
+                    <ul class="flex space-x-4">
+                        <li><a href="../index.html" class="hover:text-apple-yellow transition-colors">Game Joy</a></li>
+                        <li><a href="#game" class="hover:text-apple-yellow transition-colors">Play Now</a></li>
+                        <li><a href="#about" class="hover:text-apple-yellow transition-colors">About</a></li>
+                        <li><a href="#features" class="hover:text-apple-yellow transition-colors">Features</a></li>
+                        <li><a href="#controls" class="hover:text-apple-yellow transition-colors">Controls</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6">
+        <nav class="text-sm mb-6 breadcrumb-container p-3 rounded-lg">
+            <ol class="flex items-center space-x-2 breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="../index.html" class="flex items-center">
+                        <span class="breadcrumb-icon">🏠</span>
+                        <span>Game Joy</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item text-apple-dark font-medium">
+                    <span class="breadcrumb-icon">🔫</span>
+                    <span>Metal Slug</span>
+                </li>
+            </ol>
+        </nav>
+
+        <section id="game" class="mb-12">
+            <div class="game-container">
+                <canvas id="gameCanvas" class="game-canvas w-full h-full"></canvas>
+            </div>
+            <div class="mt-4 flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <span class="text-lg font-semibold">Score: <span id="score">0</span></span>
+                    <span class="text-lg font-semibold">High Score: <span id="highScore">0</span></span>
+                    <span class="text-lg font-semibold">Lives: <span id="lives">3</span></span>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="startButton" class="px-6 py-2 bg-apple-success text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Start Game
+                    </button>
+                    <button id="pauseButton" class="px-6 py-2 bg-apple-warning text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Pause
+                    </button>
+                    <button id="resetButton" class="px-6 py-2 bg-apple-danger text-white rounded-lg hover:bg-opacity-90 transition-colors">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">About Metal Slug</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <p class="text-lg mb-4">
+                        Metal Slug is a classic run-and-gun arcade game. Fight through waves of enemies, collect power-ups, and defeat challenging bosses in this action-packed adventure.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="game-tag bg-apple-primary text-white">Arcade</span>
+                        <span class="game-tag bg-apple-secondary text-white">Action</span>
+                        <span class="game-tag bg-apple-warning text-white">Shooter</span>
+                        <span class="game-tag bg-apple-success text-white">Retro</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">Game Features</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Classic run-and-gun gameplay
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Multiple weapons and power-ups
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Challenging boss battles
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            High score tracking
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">Weapons & Power-ups</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-3xl mb-4">🔫</div>
+                    <h3 class="text-xl font-bold mb-2">Heavy Machine Gun</h3>
+                    <p class="text-apple-muted">Rapid-fire weapon with high damage output</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-3xl mb-4">💣</div>
+                    <h3 class="text-xl font-bold mb-2">Grenades</h3>
+                    <p class="text-apple-muted">Area damage for clearing groups of enemies</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="text-3xl mb-4">🚀</div>
+                    <h3 class="text-xl font-bold mb-2">Rocket Launcher</h3>
+                    <p class="text-apple-muted">High damage single-target weapon</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="controls" class="mb-12">
+            <h2 class="text-3xl font-bold mb-6">How to Play</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">Keyboard Controls</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">↑</span>
+                            Jump
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">↓</span>
+                            Crouch
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">←</span>
+                            Move Left
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">→</span>
+                            Move Right
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">Space</span>
+                            Shoot
+                        </li>
+                        <li class="flex items-center">
+                            <span class="bg-apple-light px-3 py-1 rounded mr-3">P</span>
+                            Pause Game
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4">Touch Controls</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Swipe to move
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Tap to shoot
+                        </li>
+                        <li class="flex items-center">
+                            <span class="text-apple-success mr-2">✓</span>
+                            Double tap to jump
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-apple-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h5 class="text-xl font-bold mb-4">Game Joy</h5>
+                    <p class="text-apple-muted">Your premier destination for online gaming entertainment</p>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold mb-4">Quick Links</h5>
+                    <ul class="space-y-2">
+                        <li><a href="../index.html" class="text-apple-muted hover:text-apple-accent">Home</a></li>
+                        <li><a href="#" class="text-apple-muted hover:text-apple-accent">About Us</a></li>
+                        <li><a href="#" class="text-apple-muted hover:text-apple-accent">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="text-xl font-bold mb-4">Connect With Us</h5>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-apple-muted hover:text-apple-accent">Twitter</a>
+                        <a href="#" class="text-apple-muted hover:text-apple-accent">Discord</a>
+                        <a href="#" class="text-apple-muted hover:text-apple-accent">Reddit</a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-apple-muted text-center">
+                <p class="text-apple-muted">&copy; 2024 Game Joy. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Game variables
+        let player = {
+            x: 100,
+            y: 300,
+            width: 40,
+            height: 60,
+            speed: 5,
+            jumpForce: 12,
+            gravity: 0.5,
+            velocityY: 0,
+            isJumping: false,
+            isCrouching: false,
+            direction: 'right',
+            health: 100,
+            lives: 3,
+            weapon: 'pistol',
+            ammo: 50,
+            isInvincible: false,
+            invincibleTime: 0
+        };
+
+        let enemies = [];
+        let bullets = [];
+        let powerUps = [];
+        let platforms = [];
+        let score = 0;
+        let highScore = localStorage.getItem('metalSlugHighScore') || 0;
+        let gameLoop = null;
+        let isPaused = false;
+        let keys = {};
+
+        // Game initialization code
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+        const pauseButton = document.getElementById('pauseButton');
+        const resetButton = document.getElementById('resetButton');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const livesElement = document.getElementById('lives');
+
+        // Set canvas size
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Initialize platforms
+            platforms = [
+                { x: 0, y: canvas.height - 20, width: canvas.width, height: 20 }
+            ];
+        }
+
+        // Initialize game
+        function initGame() {
+            // Reset game state
+            player = {
+                x: 100,
+                y: 300,
+                width: 40,
+                height: 60,
+                speed: 5,
+                jumpForce: 12,
+                gravity: 0.5,
+                velocityY: 0,
+                isJumping: false,
+                isCrouching: false,
+                direction: 'right',
+                health: 100,
+                lives: 3,
+                weapon: 'pistol',
+                ammo: 50,
+                isInvincible: false,
+                invincibleTime: 0
+            };
+            
+            enemies = [];
+            bullets = [];
+            powerUps = [];
+            score = 0;
+            scoreElement.textContent = score;
+            highScoreElement.textContent = highScore;
+            livesElement.textContent = player.lives;
+            
+            // Start game loop
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(gameStep, 1000 / 60);
+            
+            // Add keyboard controls
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+            
+            // Spawn initial enemies
+            spawnEnemies();
+        }
+
+        // Handle keyboard input
+        function handleKeyDown(event) {
+            keys[event.key] = true;
+            
+            // Prevent default behavior for game controls
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'p', 'P'].includes(event.key)) {
+                event.preventDefault();
+            }
+            
+            // Jump
+            if (event.key === 'ArrowUp' && !player.isJumping) {
+                player.velocityY = -player.jumpForce;
+                player.isJumping = true;
+            }
+            
+            // Crouch
+            if (event.key === 'ArrowDown') {
+                player.isCrouching = true;
+                player.height = 30;
+            }
+            
+            // Shoot
+            if (event.key === ' ') {
+                shoot();
+            }
+            
+            // Pause
+            if (event.key === 'p' || event.key === 'P') {
+                togglePause();
+            }
+        }
+
+        function handleKeyUp(event) {
+            keys[event.key] = false;
+            
+            // Stop crouching
+            if (event.key === 'ArrowDown') {
+                player.isCrouching = false;
+                player.height = 60;
+            }
+        }
+
+        // Game step function
+        function gameStep() {
+            if (isPaused) return;
+            
+            // Update player position
+            updatePlayer();
+            
+            // Update enemies
+            updateEnemies();
+            
+            // Update bullets
+            updateBullets();
+            
+            // Update power-ups
+            updatePowerUps();
+            
+            // Check collisions
+            checkCollisions();
+            
+            // Spawn enemies periodically
+            if (Math.random() < 0.02) {
+                spawnEnemy();
+            }
+            
+            // Spawn power-ups periodically
+            if (Math.random() < 0.005) {
+                spawnPowerUp();
+            }
+            
+            // Draw game
+            draw();
+        }
+
+        // Update player position
+        function updatePlayer() {
+            // Apply gravity
+            player.velocityY += player.gravity;
+            player.y += player.velocityY;
+            
+            // Check platform collisions
+            for (const platform of platforms) {
+                if (player.y + player.height > platform.y && 
+                    player.y + player.height < platform.y + platform.height &&
+                    player.x + player.width > platform.x && 
+                    player.x < platform.x + platform.width) {
+                    player.y = platform.y - player.height;
+                    player.velocityY = 0;
+                    player.isJumping = false;
+                }
+            }
+            
+            // Move left/right
+            if (keys['ArrowLeft']) {
+                player.x -= player.speed;
+                player.direction = 'left';
+            }
+            if (keys['ArrowRight']) {
+                player.x += player.speed;
+                player.direction = 'right';
+            }
+            
+            // Keep player in bounds
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+            
+            // Update invincibility
+            if (player.isInvincible) {
+                player.invincibleTime--;
+                if (player.invincibleTime <= 0) {
+                    player.isInvincible = false;
+                }
+            }
+        }
+
+        // Update enemies
+        function updateEnemies() {
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                const enemy = enemies[i];
+                
+                // Move enemy
+                if (enemy.x > player.x) {
+                    enemy.x -= enemy.speed;
+                } else {
+                    enemy.x += enemy.speed;
+                }
+                
+                // Check if enemy is out of bounds
+                if (enemy.x + enemy.width < 0 || enemy.x > canvas.width) {
+                    enemies.splice(i, 1);
+                }
+            }
+        }
+
+        // Update bullets
+        function updateBullets() {
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                
+                // Move bullet
+                bullet.x += bullet.speed;
+                
+                // Check if bullet is out of bounds
+                if (bullet.x < 0 || bullet.x > canvas.width) {
+                    bullets.splice(i, 1);
+                }
+            }
+        }
+
+        // Update power-ups
+        function updatePowerUps() {
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                
+                // Move power-up
+                powerUp.y += powerUp.speed;
+                
+                // Check if power-up is out of bounds
+                if (powerUp.y > canvas.height) {
+                    powerUps.splice(i, 1);
+                }
+            }
+        }
+
+        // Check collisions
+        function checkCollisions() {
+            // Check bullet-enemy collisions
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                for (let j = enemies.length - 1; j >= 0; j--) {
+                    const enemy = enemies[j];
+                    if (bullet.x < enemy.x + enemy.width &&
+                        bullet.x + bullet.width > enemy.x &&
+                        bullet.y < enemy.y + enemy.height &&
+                        bullet.y + bullet.height > enemy.y) {
+                        // Remove bullet and enemy
+                        bullets.splice(i, 1);
+                        enemies.splice(j, 1);
+                        
+                        // Increase score
+                        score += 10;
+                        scoreElement.textContent = score;
+                        if (score > highScore) {
+                            highScore = score;
+                            highScoreElement.textContent = highScore;
+                            localStorage.setItem('metalSlugHighScore', highScore);
+                        }
+                        
+                        break;
+                    }
+                }
+            }
+            
+            // Check player-enemy collisions
+            if (!player.isInvincible) {
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    const enemy = enemies[i];
+                    if (player.x < enemy.x + enemy.width &&
+                        player.x + player.width > enemy.x &&
+                        player.y < enemy.y + enemy.height &&
+                        player.y + player.height > enemy.y) {
+                        // Remove enemy
+                        enemies.splice(i, 1);
+                        
+                        // Damage player
+                        player.health -= 20;
+                        if (player.health <= 0) {
+                            player.lives--;
+                            livesElement.textContent = player.lives;
+                            player.health = 100;
+                            player.isInvincible = true;
+                            player.invincibleTime = 60; // 1 second at 60 FPS
+                            
+                            if (player.lives <= 0) {
+                                gameOver();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Check player-power-up collisions
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                if (player.x < powerUp.x + powerUp.width &&
+                    player.x + player.width > powerUp.x &&
+                    player.y < powerUp.y + powerUp.height &&
+                    player.y + player.height > powerUp.y) {
+                    // Apply power-up effect
+                    applyPowerUp(powerUp.type);
+                    
+                    // Remove power-up
+                    powerUps.splice(i, 1);
+                }
+            }
+        }
+
+        // Apply power-up effect
+        function applyPowerUp(type) {
+            switch (type) {
+                case 'health':
+                    player.health = Math.min(player.health + 30, 100);
+                    break;
+                case 'ammo':
+                    player.ammo += 50;
+                    break;
+                case 'weapon':
+                    player.weapon = 'machineGun';
+                    break;
+            }
+        }
+
+        // Spawn enemies
+        function spawnEnemies() {
+            for (let i = 0; i < 3; i++) {
+                spawnEnemy();
+            }
+        }
+
+        function spawnEnemy() {
+            const side = Math.random() < 0.5 ? 'left' : 'right';
+            const enemy = {
+                x: side === 'left' ? -30 : canvas.width,
+                y: Math.random() * (canvas.height - 100),
+                width: 30,
+                height: 50,
+                speed: 2 + Math.random() * 2,
+                health: 20
+            };
+            enemies.push(enemy);
+        }
+
+        // Spawn power-up
+        function spawnPowerUp() {
+            const types = ['health', 'ammo', 'weapon'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const powerUp = {
+                x: Math.random() * (canvas.width - 20),
+                y: -20,
+                width: 20,
+                height: 20,
+                speed: 2,
+                type: type
+            };
+            powerUps.push(powerUp);
+        }
+
+        // Shoot
+        function shoot() {
+            if (player.ammo <= 0) return;
+            
+            player.ammo--;
+            
+            const bullet = {
+                x: player.direction === 'right' ? player.x + player.width : player.x,
+                y: player.y + player.height / 2,
+                width: 10,
+                height: 5,
+                speed: player.direction === 'right' ? 10 : -10
+            };
+            bullets.push(bullet);
+        }
+
+        // Draw game state
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#1C1C1E';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw platforms
+            ctx.fillStyle = '#8E8E93';
+            for (const platform of platforms) {
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            }
+            
+            // Draw player
+            ctx.fillStyle = player.isInvincible && Math.floor(Date.now() / 100) % 2 === 0 ? 'rgba(255, 255, 255, 0.5)' : '#007AFF';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Draw enemies
+            ctx.fillStyle = '#FF3B30';
+            for (const enemy of enemies) {
+                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+            }
+            
+            // Draw bullets
+            ctx.fillStyle = '#FFCC00';
+            for (const bullet of bullets) {
+                ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+            }
+            
+            // Draw power-ups
+            for (const powerUp of powerUps) {
+                switch (powerUp.type) {
+                    case 'health':
+                        ctx.fillStyle = '#34C759';
+                        break;
+                    case 'ammo':
+                        ctx.fillStyle = '#FF9500';
+                        break;
+                    case 'weapon':
+                        ctx.fillStyle = '#5856D6';
+                        break;
+                }
+                ctx.fillRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height);
+            }
+            
+            // Draw health bar
+            ctx.fillStyle = '#FF3B30';
+            ctx.fillRect(10, 10, 100, 10);
+            ctx.fillStyle = '#34C759';
+            ctx.fillRect(10, 10, player.health, 10);
+            
+            // Draw ammo
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '14px Arial';
+            ctx.fillText(`Ammo: ${player.ammo}`, 10, 40);
+        }
+
+        // Game over function
+        function gameOver() {
+            clearInterval(gameLoop);
+            gameLoop = null;
+            alert(`Game Over! Score: ${score}`);
+            startButton.disabled = false;
+        }
+
+        // Toggle pause
+        function togglePause() {
+            isPaused = !isPaused;
+            pauseButton.textContent = isPaused ? 'Resume' : 'Pause';
+        }
+
+        // Event listeners
+        window.addEventListener('resize', resizeCanvas);
+        startButton.addEventListener('click', () => {
+            startButton.disabled = true;
+            initGame();
+        });
+        pauseButton.addEventListener('click', togglePause);
+        resetButton.addEventListener('click', () => {
+            if (gameLoop) clearInterval(gameLoop);
+            gameLoop = null;
+            startButton.disabled = false;
+            isPaused = false;
+            pauseButton.textContent = 'Pause';
+        });
+
+        // Initial setup
+        resizeCanvas();
+    </script>
+</body>
+</html> 
