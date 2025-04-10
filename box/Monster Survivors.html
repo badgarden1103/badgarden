@@ -17,7 +17,7 @@
                             red: '#FF3B30',
                             green: '#34C759',                                                                                                                   
                             purple: '#AF52DE',
-                            yellow: '#FFCC00',
+                            yellow: '#FFCC00',                                                                  
                             orange: '#FF9500',
                             dark: '#1C1C1E',
                             gray: '#8E8E93',
@@ -34,6 +34,64 @@
                 height: 70vh;
             }
         }
+        .breadcrumb {
+            font-weight: 500;
+        }
+        .breadcrumb-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .breadcrumb-item:not(:last-child)::after {
+            content: "›";
+            margin: 0 0.75rem;
+            color: #8E8E93;
+            font-size: 1.2em;
+            position: relative;
+            top: -1px;
+        }
+        .breadcrumb-item a {
+            position: relative;
+            padding: 0.25rem 0;
+            display: flex;
+            align-items: center;
+            color: #007AFF;
+            text-decoration: none;
+        }
+        .breadcrumb-item a:hover {
+            color: #AF52DE;
+        }
+        .breadcrumb-item a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(to right, #007AFF, #AF52DE);
+            transition: width 0.2s ease;
+        }
+        .breadcrumb-item a:hover::after {
+            width: 100%;
+        }
+        .breadcrumb-container {
+            background: #ffffff;
+            border: 1px solid rgba(0, 122, 255, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .breadcrumb-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #007AFF, #AF52DE);
+            color: white;
+            font-size: 10px;
+        }
     </style>
 </head>
 <body class="bg-apple-lightgray text-apple-dark">
@@ -46,7 +104,7 @@
                 </div>
                 <nav>
                     <ul class="flex space-x-4">
-                        <li><a href="game-hub.html" class="hover:text-apple-yellow transition-colors">Game Hub</a></li>
+                        <li><a href="../index.html" class="hover:text-apple-yellow transition-colors">Game Hub</a></li>
                         <li><a href="#game" class="hover:text-apple-yellow transition-colors">Play Now</a></li>
                         <li><a href="#about" class="hover:text-apple-yellow transition-colors">About</a></li>
                         <li><a href="#features" class="hover:text-apple-yellow transition-colors">Features</a></li>
@@ -58,11 +116,18 @@
     </header>
 
     <main class="container mx-auto p-4 md:p-6">
-        <nav class="text-sm mb-6 bg-white p-3 rounded-lg shadow-sm">
-            <ol class="flex items-center space-x-2">
-                <li><a href="game-hub.html" class="text-apple-blue hover:text-apple-purple">Game Hub</a></li>
-                <li class="text-apple-gray">/</li>
-                <li class="text-apple-dark font-medium">Monster Survivors</li>
+        <nav class="text-sm mb-6 breadcrumb-container p-3 rounded-lg">
+            <ol class="flex items-center space-x-2 breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="../index.html" class="flex items-center">
+                        <span class="breadcrumb-icon">🏠</span>
+                        <span>Game Hub</span>
+                    </a>
+                </li>
+                <li class="breadcrumb-item text-apple-dark font-medium">
+                    <span class="breadcrumb-icon">🎮</span>
+                    <span>Monster Survivors</span>
+                </li>
             </ol>
         </nav>
         <section id="game" class="my-8">

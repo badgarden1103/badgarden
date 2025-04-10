@@ -41,6 +41,16 @@
         .hover-scale:hover {
             transform: scale(1.03);
         }
+        .breadcrumb {
+            background: linear-gradient(to right, #6C63FF, #FF6B6B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .breadcrumb-item:not(:last-child)::after {
+            content: "›";
+            margin: 0 0.5rem;
+            color: #6C757D;
+        }
     </style>
 </head>
 <body class="bg-gaming-light text-gaming-dark">
@@ -52,10 +62,10 @@
                     <span class="hidden md:inline-block px-3 py-1 bg-gaming-secondary rounded-full text-sm">Featured Games</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
-                    <a href="#featured" class="hover:text-gaming-accent transition-colors">Home</a>
+                    <a href="game-hub.html" class="hover:text-gaming-accent transition-colors">Home</a>
                     <a href="#games" class="hover:text-gaming-accent transition-colors">Games</a>
                     <a href="#trending" class="hover:text-gaming-accent transition-colors">Trending</a>
-                    <a href="index.html" class="hover:text-gaming-accent transition-colors">Monster Survivors</a>
+                    <a href="box/Monster Survivors.html" class="hover:text-gaming-accent transition-colors">Monster Survivors</a>
                 </div>
                 <button class="md:hidden text-2xl">☰</button>
             </div>
@@ -75,7 +85,7 @@
         <section id="featured" class="my-16">
             <h3 class="text-3xl font-bold mb-8 text-gaming-primary">Featured Games</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <a href="index.html" class="block">
+                <a href="box/Monster Survivors.html" class="block">
                     <div class="bg-white rounded-xl shadow-xl overflow-hidden hover-scale">
                         <div class="h-48 bg-gaming-primary flex items-center justify-center">
                             <span class="text-2xl text-white font-bold">Monster Survivors</span>
@@ -116,7 +126,7 @@
                             <li class="flex items-center space-x-4">
                                 <span class="text-2xl font-bold text-gaming-primary">1</span>
                                 <div>
-                                    <a href="index.html" class="font-semibold hover:text-gaming-primary">Monster Survivors</a>
+                                    <a href="box/Monster Survivors.html" class="font-semibold hover:text-gaming-primary">Monster Survivors</a>
                                     <p class="text-sm text-gaming-muted">1M+ Players This Week</p>
                                 </div>
                             </li>
@@ -146,7 +156,7 @@
                 <div>
                     <h5 class="text-xl font-bold mb-4">Quick Links</h5>
                     <ul class="space-y-2">
-                        <li><a href="index.html" class="text-gaming-muted hover:text-gaming-accent">Monster Survivors</a></li>
+                        <li><a href="box/Monster Survivors.html" class="text-gaming-muted hover:text-gaming-accent">Monster Survivors</a></li>
                         <li><a href="#" class="text-gaming-muted hover:text-gaming-accent">About Us</a></li>
                         <li><a href="#" class="text-gaming-muted hover:text-gaming-accent">Contact</a></li>
                     </ul>
